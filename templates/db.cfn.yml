@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 
-Description: SASKV5N RDS
+Description: EMS DEV RDS
 
 # Database stack creation prerequisite:  First create a VPC stack - see README for more info
 Parameters:
@@ -14,7 +14,7 @@ Parameters:
     AllowedPattern: "^[a-zA-Z][-a-zA-Z0-9]*$"
 
   DatabaseUser:
-    Default: startupadmin
+    Default: dbadmin
     Type: String
     Description: Database admin account name
     MinLength: 5
@@ -32,7 +32,7 @@ Parameters:
     ConstraintDescription: Password must contain only alphanumeric characters
 
   DatabaseName:
-    Default: StartupDB
+    Default: emsdevwoflow
     Type: String
     Description: Database name
     MinLength: 1
@@ -41,7 +41,7 @@ Parameters:
     ConstraintDescription: Name must begin with a letter and contain only alphanumeric characters
 
   DatabaseSize:
-    Default: 5
+    Default: 30
     Type: Number
     Description: Database storage size in gigabytes (GB)
     MinValue: 5
@@ -64,7 +64,7 @@ Parameters:
     ConstraintDescription: A value of one byte or more
 
   DatabaseEngine:
-    Default: postgres
+    Default: mysql
     Type: String
     Description: Database engines - PostgreSQL, MariaDB or MySQL
     ConstraintDescription: Choose an engine from the drop down
@@ -92,20 +92,10 @@ Parameters:
       - db.t2.small
       - db.t2.medium
       - db.t2.large
-      - db.t2.xlarge
-      - db.t2.2xlarge
-      - db.m4.large
-      - db.m4.xlarge
-      - db.m4.2xlarge
-      - db.m4.4xlarge
-      - db.m4.10xlarge
-      - db.m4.16xlarge
-      - db.r4.large
-      - db.r4.xlarge
-      - db.r4.2xlarge
-      - db.r4.4xlarge
-      - db.r4.8xlarge
-      - db.r4.16xlarge
+      - db.t4g.micro	
+      - db.t4g.small	
+      - db.t4g.medium	
+      - db.t4g.large	
 
   EnvironmentName:
     Description: Environment name, either dev or prod
@@ -257,7 +247,17 @@ Resources:
       AlarmActions:
         - !Ref DatabaseAlarmTopic
     DependsOn: Database
-
+  MyRDSParamGroup:
+    Type: 'AWS::RDS::DBParameterGroup'
+    Properties:
+      Family: mysql8.0
+      Description: CloudFormation Sample Database Parameter Group
+      Parameters:
+        autocommit: '1'
+        general_log: '1'
+        slow_query_log: '1'
+        long_query_time: '3'
+        log_output: file
   DatabaseFreeStorageSpaceAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: AlarmsEnabled
